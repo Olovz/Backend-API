@@ -1,0 +1,89 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const app = express();
+const Profile = require('./models/profile');
+port = 3000;
+
+
+//middleware
+app.use(express.json());
+
+//routes
+
+// post profile
+app.post('/profile', async(req, res) => {
+    try {
+        const profile = await Profile.create(req.body)
+    res.status(200).json(profile)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+// get all profiles
+app.get('/profiles', async(req, res) => {
+    try {
+        const profiles = await Profile.find()
+        res.status(200).json(profiles)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+// get one profile
+app.get('/profiles/:id', async (req, res) => {
+    try {
+        const {id} = req.params
+        const profile = await Profile.findById(id)
+        res.status(200).json(profile)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+// update profile
+app.put('/profiles/:id', async(req, res) => {
+    try {
+        const {id} = req.params
+        const profile = await Profile.findByIdAndUpdate(id, req.body)
+        if(!profile){
+           return res.status(404).json(`cannot find this Profile ${id}`)
+        }
+        const updatedProfile = await Profile.findById(id)
+        res.status(200).json(updatedProfile)
+    
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+    
+}) 
+
+//Delete Profile
+app.delete('/profiles/:id', async(req, res) => {
+    try {
+        const {id} = req.params
+        const profile = await Profile.findByIdAndDelete(id)
+        if(!profile){
+           return res.status(404).json({message: `cannot find any prodcut with ID: ${id}`})
+        }
+        res.status(200).json(profile)
+    } catch (error) {
+        res.status(500).json({messsage: error.message})
+    }
+})
+
+// db connection
+app.listen(port, () =>{
+    console.log(`backend now is listening on port: ${port}`);
+}); 
+
+mongoose.connect('mongodb+srv://aceoloverio:Passwordko123@cluster0.ffymizh.mongodb.net/backend?retryWrites=true&w=majority&appName=Cluster0')
+.then(() => {
+    console.log('connected to atlas Db')
+}).catch((error) => {
+    console.log(error.message)
+});
+
+
+
+// NODE_ENV =development
+// MONGO_URL=mongodb+srv://aceoloverio:Passwordko123@cluster0.ffymizh.mongodb.net/datas?retryWrites=true&w=majority&appName=Cluster0
+// PORT = 3000
+// FRONT_END = http://localhost:3000
